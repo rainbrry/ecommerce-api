@@ -1,11 +1,8 @@
 import { Router } from "express";
 import UserController from "#controller/UserController";
 import AuthController from "#controller/AuthController";
-import {
-	requireAuth,
-	requireAdmin,
-	checkUser,
-} from "#middleware/Authenticated";
+import { verifyRefreshToken } from "#middleware/VerifyToken";
+import { requireAuth, requireAdmin } from "#middleware/Authenticated";
 
 const route = Router();
 
@@ -13,7 +10,7 @@ const route = Router();
 route.post("/login", AuthController.login);
 route.post("/register", AuthController.register);
 route.post("/logout", AuthController.logout);
-route.post("/refresh_token", AuthController.refreshToken);
+route.post("/refresh_token", verifyRefreshToken, AuthController.refreshToken);
 
 route.get("/", async (req, res) => res.send("Hello World!"));
 

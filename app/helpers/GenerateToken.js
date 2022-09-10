@@ -4,7 +4,7 @@ import { accessTokenKey, refreshTokenKey } from "#config/env";
 // Generate access token
 const generateAccessToken = (payload) => {
 	return jwt.sign(payload, accessTokenKey, {
-		expiresIn: "15m",
+		expiresIn: "15ms",
 	});
 };
 
