@@ -1,4 +1,3 @@
-import crypto from "crypto-js";
 import User from "#model/User";
 import { encryptPassword, verifyPassword } from "#helper/EncryptPassword";
 import {
@@ -41,31 +40,24 @@ const AuthController = {
 		// Add refresh token to user (push to array)
 		user.refreshToken.push({ token: refreshToken });
 
+		// delete cookies if exist
+		if (req.cookies[`${user._id}`]) req.cookies[`${user._id}`] = "";
+
 		// Save user
 		await user
 			.save()
 			.then((user) => {
 				// Set cookie
-				res.cookie(
-					String(user._id),
-					{ accessToken },
-					{
-						httpOnly: true, // Prevents client side javascript from reading the cookie
-						maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-						sameSite: "lax", // CSRF
-						path: "/", // Allow cookie to be sent to all routes
-					}
-				);
-
-				res.cookie("refreshToken", refreshToken, {
+				res.cookie(String(user._id), accessToken, {
 					httpOnly: true, // Prevents client side javascript from reading the cookie
-					maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 					sameSite: "lax", // CSRF
 					path: "/", // Allow cookie to be sent to all routes
 				});
 
 				// Send response
-				return res.status(200).json({ message: "Login successful" });
+				return res
+					.status(200)
+					.json({ message: "Login successful", refreshToken });
 			})
 			// Catch error
 			.catch((err) => {
@@ -132,49 +124,15 @@ const AuthController = {
 			});
 	},
 
-	// Refresh token
-	// refreshToken: async (req, res) => {
-	// 	// Get refresh token from cookie
-	// 	const refreshToken = req.headers.cookie.split("=")[1];
-
-	// 	// Check if refresh token is provided
-	// 	if (!refreshToken) {
-	// 		return res.status(400).json({ message: "Please login or register" });
-	// 	}
-
-	// 	// Verify refresh token
-	// 	const decoded = verifyRefreshToken(refreshToken);
-
-	// 	// Check if user exists
-	// 	const user = await User.findById(decoded.id).select("+refreshToken");
-	// 	if (!user) {
-	// 		return res.status(400).json({ message: "Please login or register" });
-	// 	}
-	// 	// Check if refresh token is valid
-	// 	if (refreshToken !== user.refreshToken) {
-	// 		return res.status(400).json({ message: "Please login or register" });
-	// 	}
-	// 	// Generate access token
-	// 	const accessToken = generateAccessToken({ id: user._id });
-
-	// 	// Send access token to client
-	// 	res.status(200).json({ accessToken });
-	// },
-
 	refreshToken: async (req, res) => {
 		// Get refresh token from cookie
-		const accessToken = await generateAccessToken({ id: req.user.id });
+		const accessToken = await generateAccessToken({ id: req.userId });
 
-		res.cookie(
-			String(req.user.id),
-			{ accessToken },
-			{
-				httpOnly: true, // Prevents client side javascript from reading the cookie
-				maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-				sameSite: "lax", // CSRF
-				path: "/", // Allow cookie to be sent to all routes
-			}
-		);
+		res.cookie(String(req.userId), accessToken, {
+			httpOnly: true, // Prevents client side javascript from reading the cookie
+			sameSite: "lax", // CSRF
+			path: "/", // Allow cookie to be sent to all routes
+		});
 
 		res.status(200).json({ message: "Token refreshed" });
 	},
