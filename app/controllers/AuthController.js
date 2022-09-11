@@ -35,10 +35,10 @@ const AuthController = {
 		const accessToken = generateAccessToken({ id: user._id });
 
 		// Generate refresh token
-		const refreshToken = generateRefreshToken({ id: user._id });
+		const authRefreshToken = generateRefreshToken({ id: user._id });
 
 		// Add refresh token to user (push to array)
-		user.refreshToken.push({ token: refreshToken });
+		user.refreshToken.push({ token: authRefreshToken });
 
 		// delete cookies if exist
 		if (req.cookies[`${user._id}`]) req.cookies[`${user._id}`] = "";
@@ -54,10 +54,11 @@ const AuthController = {
 					path: "/", // Allow cookie to be sent to all routes
 				});
 
+				// destructuring user object, except password, isAdmin and refreshToken
+				const { password, isAdmin, refreshToken, ...auth } = user._doc;
+
 				// Send response
-				return res
-					.status(200)
-					.json({ message: "Login successful", refreshToken });
+				return res.status(200).json({ ...auth, authRefreshToken });
 			})
 			// Catch error
 			.catch((err) => {
