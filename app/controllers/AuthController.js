@@ -1,4 +1,3 @@
-import crypto from "crypto-js";
 import User from "#model/User";
 import { encryptPassword, verifyPassword } from "#helper/EncryptPassword";
 import {
