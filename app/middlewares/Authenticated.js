@@ -4,14 +4,14 @@ import User from "#model/User";
 // check if user is exist (not deleted)
 const checkUser = (req, res, next) => {
 	verifyAccessToken(req, res, async () => {
-		const user = await User.findById(req.userId).select(["+isAdmin"]);
+		const user = await User.findById(req.userId).select(["+role"]);
 		if (!user) {
 			return res.status(403).json({ message: "Not allowed" });
 		}
 
 		req.user = {
 			id: user._id,
-			isAdmin: user.isAdmin,
+			role: user.role,
 		};
 		next();
 	});
@@ -32,11 +32,21 @@ const requireAuth = (req, res, next) => {
 // check user isAdmin, allowed if true
 const requireAdmin = (req, res, next) => {
 	checkUser(req, res, () => {
-		if (!req.user.isAdmin) {
+		if (req.user.role !== "admin") {
 			return res.status(403).json({ message: "Not allowed" });
 		}
 		next();
 	});
 };
 
-export { checkUser, requireAuth, requireAdmin };
+// for superadmin
+const requireSuperAdmin = (req, res, next) => {
+	checkUser(req, res, () => {
+		if (req.user.role !== "superadmin") {
+			return res.status(403).json({ message: "Not allowed" });
+		}
+		next();
+	});
+};
+
+export { checkUser, requireAuth, requireAdmin, requireSuperAdmin };

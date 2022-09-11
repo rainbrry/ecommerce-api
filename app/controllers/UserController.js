@@ -4,14 +4,21 @@ import User from "#model/User";
 const UserController = {
 	// Get all users
 	index: async (req, res) => {
-		const users = await User.find();
-		res.status(200).json(users);
+		await User.find()
+			.select("+role")
+			.then((users) => {
+				res.status(200).json(users);
+			})
+			.catch((err) => res.status(405).json({ message: err.message }));
 	},
 
 	// Get a user by id
 	show: async (req, res) => {
-		const user = await User.findById(req.params.id);
-		res.status(200).json(user);
+		await User.findById(req.params.id)
+			.then((user) => {
+				res.status(200).json(user);
+			})
+			.catch((err) => res.status(405).json({ message: err.message }));
 	},
 
 	// Create a user
@@ -20,6 +27,7 @@ const UserController = {
 			fullname: req.body.fullname,
 			email: req.body.email,
 			password: req.body.password,
+			role: req.body.role,
 		});
 
 		const user = await User.create(request);
@@ -32,16 +40,22 @@ const UserController = {
 			username: req.body.username,
 		};
 
-		const user = await User.findByIdAndUpdate(req.params.id, request, {
+		await User.findByIdAndUpdate(req.params.id, request, {
 			new: true,
-		});
-		res.status(200).json({ message: "User updated successfully", user });
+		})
+			.then((user) => {
+				res.status(200).json({ message: "User updated successfully", user });
+			})
+			.catch((err) => res.status(405).json({ message: err.message }));
 	},
 
 	// Delete a user
 	destroy: async (req, res) => {
-		await User.findByIdAndDelete(req.params.id);
-		res.status(200).json({ message: "User deleted successfully" });
+		await User.findByIdAndDelete(req.params.id)
+			.then(() => {
+				res.status(200).json({ message: "User deleted successfully" });
+			})
+			.catch((err) => res.status(405).json({ message: err.message }));
 	},
 
 	// Update user profile
@@ -52,10 +66,13 @@ const UserController = {
 			address: req.body.address,
 		};
 
-		const user = await User.findByIdAndUpdate(req.params.id, request, {
+		await User.findByIdAndUpdate(req.params.id, request, {
 			new: true,
-		});
-		res.status(200).json({ message: "Profile updated successfully", user });
+		})
+			.then((user) => {
+				res.status(200).json({ message: "Profile updated successfully", user });
+			})
+			.catch((err) => res.status(405).json({ message: err.message }));
 	},
 
 	// Change user email

@@ -88,11 +88,9 @@ const AuthController = {
 		// Save user
 		await newUser
 			.save()
-			.then((user) => {
-				const { password, ...users } = user._doc;
-
+			.then(() => {
 				// Send response
-				res.status(201).json({ message: "Registration successful", ...users });
+				res.status(201).json({ message: "Registration successful" });
 			})
 			// Catch error
 			.catch((err) => {
@@ -142,6 +140,7 @@ const AuthController = {
 	getAuth: async (req, res) => {
 		// Get user from database
 		await User.findById(req.user.id)
+			.select("+role")
 			.then((user) => {
 				// Send response
 				return res.status(200).json(user);
