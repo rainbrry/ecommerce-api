@@ -128,6 +128,10 @@ const AuthController = {
 		// Get refresh token from cookie
 		const accessToken = await generateAccessToken({ id: req.userId });
 
+		// delete cookie if exist
+		res.clearCookie(`${req.userId}`, { path: "/" });
+		req.cookies[`${req.userId}`] = "";
+
 		res.cookie(String(req.userId), accessToken, {
 			httpOnly: true, // Prevents client side javascript from reading the cookie
 			sameSite: "lax", // CSRF
