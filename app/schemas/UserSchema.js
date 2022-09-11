@@ -2,8 +2,6 @@ import mongoose from "mongoose";
 
 const { Schema } = mongoose;
 
-const TokenSchema = new Schema({ token: { type: String } });
-
 const UserSChema = new Schema(
 	{
 		fullname: { type: String, required: true },
@@ -13,10 +11,9 @@ const UserSChema = new Schema(
 		isAdmin: { type: Boolean, default: false, select: false },
 		password: { type: String, required: true, select: false },
 		address: { type: String },
-		refreshToken: { type: [TokenSchema], select: false },
+		refreshToken: { type: Array, select: false },
 	},
 	{
-		timestamps: true,
 		versionKey: false,
 	}
 );

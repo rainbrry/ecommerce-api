@@ -1,15 +1,18 @@
-import { verifyToken } from "#middleware/VerifyToken";
+import { verifyAccessToken } from "#middleware/VerifyToken";
 import User from "#model/User";
 
 // check if user is exist (not deleted)
 const checkUser = (req, res, next) => {
-	verifyToken(req, res, async () => {
-		const user = await User.findById(req.userId).select("+isAdmin");
+	verifyAccessToken(req, res, async () => {
+		const user = await User.findById(req.userId).select(["+isAdmin"]);
 		if (!user) {
 			return res.status(403).json({ message: "Not allowed" });
 		}
 
-		req.user = { id: user._id, isAdmin: user.isAdmin };
+		req.user = {
+			id: user._id,
+			isAdmin: user.isAdmin,
+		};
 		next();
 	});
 };
